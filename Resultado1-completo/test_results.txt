@@ -1,0 +1,3 @@
+1-s2.0-S1550830720303839-main.pdf: original=4707, query=4707
+1-s2.0-S0033062023000129-main.pdf: original=9645, query=9645
+1-s2.0-S0033062023000142-main.pdf: original=9022, query=9022
