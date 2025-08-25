@@ -1,0 +1,55 @@
+=== RESULTADOS TEST CRUD COMPLETO ===
+Fecha de ejecución: 2025-08-25T05:31:00.685629
+Archivos PDF de prueba: 3
+Total registros procesados: 581
+
+=== VALIDACIÓN DE BASE DE DATOS ===
+Test: database_validation
+Estado: exists
+Exitoso: ✓
+----------------------------------------
+
+=== OPERACIONES READ (CONSULTA) ===
+Documento: 1-s2.0-S1550830720303839-main.pdf
+Chunks encontrados: 161
+Legible: ✓
+Tiene metadatos: ✓
+Caracteres de contenido: 30808
+----------------------------------------
+Documento: 1-s2.0-S0033062023000129-main.pdf
+Chunks encontrados: 227
+Legible: ✓
+Tiene metadatos: ❌
+Caracteres de contenido: 64479
+----------------------------------------
+Documento: 1-s2.0-S0033062023000142-main.pdf
+Chunks encontrados: 193
+Legible: ✓
+Tiene metadatos: ❌
+Caracteres de contenido: 63818
+----------------------------------------
+
+=== OPERACIONES UPDATE (ACTUALIZACIÓN) ===
+Documento: 1-s2.0-S1550830720303839-main.pdf
+Título original: The effect of Emotional Freedom Techniques on nurses' stress, anxiety, and burnout levels during the COVID-19 pandemic: A randomized controlled trial
+Nuevo título: UPDATED_TEST: The effect of Emotional Freedom Techniques on nurses' stress, anxiety, and burnout levels during the COVID-19 pandemic: A randomized controlled trial
+Actualización exitosa: ✓
+----------------------------------------
+
+=== OPERACIONES DELETE (ELIMINACIÓN) ===
+Documento: 1-s2.0-S0033062023000142-main.pdf
+Registros iniciales: 581
+Chunks del documento: 193
+Registros eliminados: DeleteResult(version=4)
+Registros finales: 388
+Eliminación exitosa: ✓
+----------------------------------------
+
+=== RESUMEN FINAL ===
+Creación de BD: ✓
+Operaciones READ: 3/3
+Operaciones UPDATE: 1/1
+Operaciones DELETE: 1/1
+Validaciones: 1/1
+Total errores: 0
+Éxito general: ✓ TODOS LOS TESTS PASARON

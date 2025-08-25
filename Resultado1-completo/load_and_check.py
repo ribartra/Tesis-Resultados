@@ -3,6 +3,8 @@ import re
 import unicodedata
 import random
 import sys
+import json
+from datetime import datetime
 from math import ceil, sqrt
 
 import numpy as np
@@ -21,10 +23,14 @@ TABLE_NAME = "docs_qa"
 EMBEDDING_DIM = 768  # Dimensiones para embedder nomic-embed-text
 PDF_DIR = os.path.join(os.path.dirname(__file__), "docs")
 MAX_WORDS = 512
+METADATA_FILE = "docs_metadata.json"  # Archivo JSON para correspondencia y orden
+DOCUMENTOS_CSV = "Documentos.csv"  # Archivo CSV con información de documentos
 
 # Pydantic schema for PDF chunks
 class PdfChunk(LanceModel):
     pdf_name: str
+    titulo: str
+    fuente: str
     chunk_index: int
     text: str
     vector: Vector(EMBEDDING_DIM)
@@ -58,17 +64,50 @@ def init_converter_and_embedder(embedder_id: str ,embedding_dim: int):
     print(f"Ollama embedder {embedder_id} cargado exitosamente a {embedding_dim} dimensiones")
     return converter, embedder
 
+def load_documentos_info():
+    """
+    Carga la información de títulos y fuentes desde Documentos.csv usando Polars.
+    Retorna un diccionario con nombre_archivo como clave.
+    """
+    try:
+        if os.path.exists(DOCUMENTOS_CSV):
+            # Cargar CSV con Polars, especificando el separador correcto
+            df = pl.read_csv(DOCUMENTOS_CSV, separator=";", encoding="utf-8")
+            # Crear diccionario con nombre_archivo como clave
+            docs_info = {}
+            for row in df.iter_rows(named=True):
+                if row.get("Nombre_archivo"):  # Verificar que no esté vacío
+                    docs_info[row["Nombre_archivo"]] = {
+                        "titulo": row.get("Título", ""),
+                        "fuente": row.get("Fuente", ""),
+                        "id": row.get("ID", "")
+                    }
+            print(f"Cargados {len(docs_info)} documentos desde {DOCUMENTOS_CSV}")
+            return docs_info
+        else:
+            print(f"Archivo {DOCUMENTOS_CSV} no encontrado. Continuando sin información de títulos/fuentes.")
+            return {}
+    except Exception as e:
+        print(f"Error cargando información de documentos: {e}")
+        return {}
+
 def list_pdf_files(pdf_dir: str):
     files = [f for f in os.listdir(pdf_dir) if f.lower().endswith(".pdf")]
     if not files:
         raise FileNotFoundError("No hay archivos .pdf. encontrados en el archivo")
     return files
 
-def select_pdfs(files: list[str], selection: str=None) -> list[str]:
+def select_pdfs(files: list[str], docs_info: dict, selection: str=None) -> list[str]:
     if selection is not None:
         print("Selecciona 1 o mas PDF (indices separados por comas) o '.' para todos:")
         for idx, fn in enumerate(files, 1):
-            print(f"  {idx}. {fn}")
+            if fn in docs_info:
+                info = docs_info[fn]
+                print(f"  {idx}. {fn}")
+                print(f"      Título: {info['titulo']}")
+                print(f"      Fuente: {info['fuente']}")
+            else:
+                print(f"  {idx}. {fn} (sin información adicional)")
 
     selection = input("Indices (por ejemplo 1, 3 or .): ").strip()
     if selection == '.':
@@ -261,16 +300,25 @@ def chunkify_by_paragraphs(text: str) -> list[str]:
     return chunks
 
 def process_pdfs(
-    pdf_names: list[str], pdf_dir: str, converter, embedder, embedding_dim: int
-) -> tuple[list[dict], dict[str,int]]:
+    pdf_names: list[str], pdf_dir: str, converter, embedder, embedding_dim: int, docs_info: dict
+) -> tuple[list[dict], dict[str,int], dict]:
     """
     Procesa cada PDF, genera registros chunk + embeddings,
-    y devuelve además un mapping pdf_name -> total_words (pre-chunk).
+    y devuelve además un mapping pdf_name -> total_words (pre-chunk) y metadatos de orden.
     """    
     records = []
-    doc_word_counts: dict[str,int] = {}    
+    doc_word_counts: dict[str,int] = {}
+    # Metadatos para mantener correspondencia y orden
+    metadata = {
+        "processing_timestamp": datetime.now().isoformat(),
+        "embedding_model": "nomic-embed-text-v2",
+        "embedding_dimensions": embedding_dim,
+        "max_words_per_chunk": MAX_WORDS,
+        "documents": {},
+        "processing_order": []
+    }
 
-    for pdf_name in pdf_names:
+    for doc_order, pdf_name in enumerate(pdf_names):
         pdf_path = os.path.join(pdf_dir, pdf_name)
         print(f"\nProcesando texto del PDF: {pdf_name}")
 
@@ -298,6 +346,23 @@ def process_pdfs(
 
         chunks = chunkify_by_paragraphs(full_text)
         print(f"Se obtuvieron {len(chunks)} chunks de texto para '{pdf_name}' (palabras: {total_words}).")
+        
+        # Obtener información del documento desde docs_info
+        doc_info = docs_info.get(pdf_name, {})
+        titulo = doc_info.get("titulo", "")
+        fuente = doc_info.get("fuente", "")
+        
+        # Agregar metadatos del documento
+        metadata["processing_order"].append(pdf_name)
+        metadata["documents"][pdf_name] = {
+            "order": doc_order,
+            "titulo": titulo,
+            "fuente": fuente,
+            "total_words": total_words,
+            "total_chunks": len(chunks),
+            "file_path": pdf_path,
+            "chunks_metadata": []
+        }
 
         for idx, chunk in enumerate(chunks):
             try:
@@ -310,14 +375,81 @@ def process_pdfs(
             if emb_np.shape[0] != embedding_dim or np.any(np.isnan(emb_np)):
                 emb_np = np.zeros((embedding_dim,), dtype=np.float32)
 
+            # Metadatos del chunk para el JSON
+            chunk_metadata = {
+                "chunk_index": idx,
+                "word_count": len(chunk.split()),
+                "char_count": len(chunk),
+                "preview": chunk[:100] + "..." if len(chunk) > 100 else chunk
+            }
+            metadata["documents"][pdf_name]["chunks_metadata"].append(chunk_metadata)
+
             records.append({
                 "pdf_name": pdf_name,
+                "titulo": titulo,
+                "fuente": fuente,
                 "chunk_index": idx,
                 "text": chunk,
                 "vector": emb_np.tolist(),
             })
 
-    return records, doc_word_counts
+    return records, doc_word_counts, metadata
+
+def save_metadata_json(metadata: dict, file_path: str = METADATA_FILE):
+    """
+    Guarda los metadatos de correspondencia y orden en un archivo JSON.
+    """
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(metadata, f, indent=2, ensure_ascii=False)
+        print(f"Metadatos guardados en '{file_path}'")
+    except Exception as e:
+        print(f"Error guardando metadatos: {e}")
+
+def load_metadata_json(file_path: str = METADATA_FILE) -> dict:
+    """
+    Carga los metadatos de correspondencia y orden desde un archivo JSON.
+    """
+    try:
+        if os.path.exists(file_path):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        else:
+            print(f"Archivo de metadatos '{file_path}' no encontrado.")
+            return {}
+    except Exception as e:
+        print(f"Error cargando metadatos: {e}")
+        return {}
+
+def show_metadata_structure_example():
+    """
+    Muestra un ejemplo de la estructura JSON que se generará.
+    """
+    ejemplo = {
+        "processing_timestamp": "2024-01-15T10:30:00.123456",
+        "embedding_model": "nomic-embed-text-v2",
+        "embedding_dimensions": 768,
+        "max_words_per_chunk": 512,
+        "processing_order": ["documento1.pdf", "documento2.pdf"],
+        "documents": {
+            "documento1.pdf": {
+                "order": 0,
+                "total_words": 1500,
+                "total_chunks": 3,
+                "file_path": "/ruta/docs/documento1.pdf",
+                "chunks_metadata": [
+                    {
+                        "chunk_index": 0,
+                        "word_count": 500,
+                        "char_count": 2800,
+                        "preview": "Texto de ejemplo del primer chunk..."
+                    }
+                ]
+            }
+        }
+    }
+    print("\nEstructura JSON que se generará:")
+    print(json.dumps(ejemplo, indent=2, ensure_ascii=False))
 
 def insert_records(table, records: list[dict]):
     if not records:
@@ -428,45 +560,83 @@ def create_fts_index(table):
 
 def query_documents(table):
     """
-    Menú de consulta usando Polars en vez de Pandas.
+    Menú de consulta usando Polars en vez de Pandas y manteniendo el orden con metadatos JSON.
     """
-    # 1. Cargamos todo en un DataFrame de Polars
+    # 1. Cargar metadatos JSON
+    metadata = load_metadata_json()
+    
+    # 2. Cargamos todo en un DataFrame de Polars
     df = pl.from_arrow(table.to_arrow())
 
-    # 2. Extraemos lista de documentos únicos
-    docs = df.select("pdf_name").unique().to_series().to_list()
+    # 3. Extraemos lista de documentos según el orden de procesamiento
+    if metadata and "processing_order" in metadata:
+        # Usar el orden de procesamiento del JSON
+        docs = metadata["processing_order"]
+        print(f"\nUsando orden de procesamiento desde metadatos: {len(docs)} documentos")
+    else:
+        # Fallback al orden natural de la base de datos
+        docs = df.select("pdf_name").unique().to_series().to_list()
+        print("\nAdvertencia: No se encontraron metadatos, usando orden de base de datos")
 
-    # 3. Menú de selección
+    # 4. Menú de selección con información de metadatos
     print("\nSelecciona el/los documento(s) a consultar:")
     for i, name in enumerate(docs, 1):
-        print(f"  {i}. {name}")
+        if metadata and name in metadata.get("documents", {}):
+            doc_info = metadata["documents"][name]
+            titulo = doc_info.get('titulo', '')
+            fuente = doc_info.get('fuente', '')
+            print(f"  {i}. {name}")
+            if titulo:
+                print(f"      Título: {titulo}")
+            if fuente:
+                print(f"      Fuente: {fuente}")
+            print(f"      (orden: {doc_info['order']}, chunks: {doc_info['total_chunks']}, palabras: {doc_info['total_words']})")
+        else:
+            print(f"  {i}. {name}")
+    
     sel = input("Índices (ej. 1,3): ").strip()
     idxs = [int(x)-1 for x in sel.split(",") if x.strip().isdigit()]
     chosen = [docs[i] for i in idxs if 0 <= i < len(docs)]
     if not chosen:
         raise ValueError("No se seleccionó ningún documento válido.")
 
-    # 4. Para cada documento elegido, calculamos métricas y opcionalmente mostramos texto
+    # 5. Para cada documento elegido, calculamos métricas y opcionalmente mostramos texto
     for pdf in chosen:
         sub = df.filter(pl.col("pdf_name") == pdf)
         n_chunks = sub.height
-        # Contamos palabras sumando longitud de split() de cada texto
-        total_words = (
-            sub
-            .with_columns(pl.col("text")
-                         .str.split(" ")
-                         .list.len()
-                         .alias("word_count"))
-            .select(pl.col("word_count"))
-            .sum()
-            .item()
-        )
-        print(f"\nDocumento: {pdf}")
-        print(f" • Chunks almacenados: {n_chunks}")
-        print(f" • Palabras totales (suma de chunks): {total_words}")
+        
+        # Información de metadatos si está disponible
+        if metadata and pdf in metadata.get("documents", {}):
+            doc_meta = metadata["documents"][pdf]
+            titulo = doc_meta.get('titulo', '')
+            fuente = doc_meta.get('fuente', '')
+            print(f"\nDocumento: {pdf}")
+            if titulo:
+                print(f" • Título: {titulo}")
+            if fuente:
+                print(f" • Fuente: {fuente}")
+            print(f" • Orden de procesamiento: {doc_meta['order']}")
+            print(f" • Chunks almacenados: {n_chunks}")
+            print(f" • Palabras totales (metadatos): {doc_meta['total_words']}")
+            print(f" • Archivo: {doc_meta['file_path']}")
+        else:
+            # Contamos palabras sumando longitud de split() de cada texto
+            total_words = (
+                sub
+                .with_columns(pl.col("text")
+                             .str.split(" ")
+                             .list.len()
+                             .alias("word_count"))
+                .select(pl.col("word_count"))
+                .sum()
+                .item()
+            )
+            print(f"\nDocumento: {pdf}")
+            print(f" • Chunks almacenados: {n_chunks}")
+            print(f" • Palabras totales (suma de chunks): {total_words}")
 
         if input("¿Mostrar texto completo concatenado? (y/N): ").lower() == "y":
-            # Concatenamos manteniendo orden de chunk_index
+            # Concatenamos manteniendo orden de chunk_index (orden original)
             full = (
                 sub
                 .sort("chunk_index")
@@ -474,7 +644,7 @@ def query_documents(table):
                 .to_series()
                 .to_list()
             )
-            print("\n--- Inicio texto completo ---\n")
+            print("\n--- Inicio texto completo (orden original) ---\n")
             print("\n\n".join(full))
             print("\n--- Fin texto completo ---\n")
 
@@ -483,14 +653,26 @@ def main():
     db = connect_database(LANCEDB_PATH)
     table = prepare_table(db, TABLE_NAME, PdfChunk)
     converter, embedder = init_converter_and_embedder("nomic-embed-text-v2",EMBEDDING_DIM)
+    
+    # Cargar información de documentos desde CSV
+    docs_info = load_documentos_info()
+    
     pdf_files = list_pdf_files(pdf_dir)
-    selected_pdfs = select_pdfs(pdf_files)
-    records, doc_word_counts  = process_pdfs(selected_pdfs, pdf_dir, converter, embedder, EMBEDDING_DIM)
+    selected_pdfs = select_pdfs(pdf_files, docs_info)
+    
+    # Procesar PDFs y obtener metadatos de orden
+    records, doc_word_counts, metadata = process_pdfs(selected_pdfs, pdf_dir, converter, embedder, EMBEDDING_DIM, docs_info)
+    
+    # Guardar metadatos JSON para mantener correspondencia y orden
+    save_metadata_json(metadata)
+    
     total = insert_records(table, records)
     create_vector_index(table, total, EMBEDDING_DIM)
     preview_records(records)
     create_fts_index(table)
+    
     print(f"\nBase vectorial LanceDB lista en '{LANCEDB_PATH}' con {total} registros.")
+    print(f"Metadatos de orden guardados en '{METADATA_FILE}'")
     query_documents(table)
 
 if __name__ == "__main__":

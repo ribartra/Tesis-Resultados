@@ -1,0 +1,27 @@
+=== RESULTADOS TEST 3 DOCUMENTOS ===
+Fecha de ejecución: 2025-08-25 02:43:52
+PDFs procesados: 3
+
+Archivo: 1-s2.0-S1550830720303839-main.pdf
+Título: The effect of Emotional Freedom Techniques on nurses' stress, anxiety, and burnout levels during the COVID-19 pandemic: A randomized controlled trial
+Palabras pre-LanceDB: 4707
+Palabras post-consulta: 4707
+Match exitoso: ✓
+--------------------------------------------------
+Archivo: 1-s2.0-S0033062023000129-main.pdf
+Título: Musculoskeletal exercise: Its role in promoting health and longevity
+Palabras pre-LanceDB: 9645
+Palabras post-consulta: 9645
+Match exitoso: ✓
+--------------------------------------------------
+Archivo: 1-s2.0-S0033062023000142-main.pdf
+Título: Exercise as a therapeutic modality for the prevention and treatment of depression
+Palabras pre-LanceDB: 9022
+Palabras post-consulta: 9022
+Match exitoso: ✓
+--------------------------------------------------
+
+=== RESUMEN ===
+Total documentos: 3
+Tests exitosos: 3
+Tests fallidos: 0
