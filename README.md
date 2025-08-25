@@ -270,7 +270,7 @@ ollama pull nomic-embed-text-v2
 
 ## 📄 Licencia
 
-MIT License - ver archivo LICENSE para detalles.
+Apache License - ver archivo LICENSE para detalles.
 
 ## 🙏 Reconocimientos
 
