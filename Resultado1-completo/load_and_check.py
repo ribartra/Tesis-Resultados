@@ -91,23 +91,34 @@ def load_documentos_info():
         print(f"Error cargando información de documentos: {e}")
         return {}
 
-def list_pdf_files(pdf_dir: str):
-    files = [f for f in os.listdir(pdf_dir) if f.lower().endswith(".pdf")]
-    if not files:
-        raise FileNotFoundError("No hay archivos .pdf. encontrados en el archivo")
+def list_pdf_files(pdf_dir: str, docs_info: dict = None):
+    """Lista archivos PDF que estén presentes tanto en la carpeta como en Documentos.csv"""
+    all_files = [f for f in os.listdir(pdf_dir) if f.lower().endswith(".pdf")]
+    
+    if docs_info:
+        # Solo incluir archivos que estén tanto en la carpeta como en el CSV
+        files = [f for f in all_files if f in docs_info]
+        if not files:
+            print(f"Archivos PDF encontrados en carpeta: {len(all_files)}")
+            print(f"Archivos con información en CSV: {len(docs_info)}")
+            raise FileNotFoundError("No hay archivos PDF que coincidan entre la carpeta 'docs' y 'Documentos.csv'")
+    else:
+        files = all_files
+        if not files:
+            raise FileNotFoundError("No hay archivos .pdf encontrados en la carpeta")
+    
     return files
 
 def select_pdfs(files: list[str], docs_info: dict, selection: str=None) -> list[str]:
-    if selection is not None:
-        print("Selecciona 1 o mas PDF (indices separados por comas) o '.' para todos:")
-        for idx, fn in enumerate(files, 1):
-            if fn in docs_info:
-                info = docs_info[fn]
-                print(f"  {idx}. {fn}")
-                print(f"      Título: {info['titulo']}")
-                print(f"      Fuente: {info['fuente']}")
-            else:
-                print(f"  {idx}. {fn} (sin información adicional)")
+    print("Selecciona 1 o mas PDF (indices separados por comas) o '.' para todos:")
+    for idx, fn in enumerate(files, 1):
+        if fn in docs_info:
+            info = docs_info[fn]
+            print(f"  {idx}. {fn}")
+            print(f"      Título: {info['titulo']}")
+            print(f"      Fuente: {info['fuente']}")
+        else:
+            print(f"  {idx}. {fn} (sin información adicional)")
 
     selection = input("Indices (por ejemplo 1, 3 or .): ").strip()
     if selection == '.':
@@ -657,7 +668,7 @@ def main():
     # Cargar información de documentos desde CSV
     docs_info = load_documentos_info()
     
-    pdf_files = list_pdf_files(pdf_dir)
+    pdf_files = list_pdf_files(pdf_dir, docs_info)
     selected_pdfs = select_pdfs(pdf_files, docs_info)
     
     # Procesar PDFs y obtener metadatos de orden
