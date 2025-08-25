@@ -1,8 +1,6 @@
 # Vector Database Management System
 Sistema de gestión de base de datos vectorial con operaciones CRUD completas para documentos PDF. Implementa RAG (Retrieval-Augmented Generation) usando LanceDB, embeddings Nomic y Ollama con Llama 3.2.
 
-![Agno AI RAG Demo](https://github.com/lesteroliver911/economic-analyst-ai-agent/blob/main/asset/agno-ai.gif)
-
 ## Características Principales
 
 - **Base Vectorial LanceDB**: Almacenamiento eficiente con índices IVF_PQ y HNSW
@@ -22,27 +20,12 @@ Sistema de gestión de base de datos vectorial con operaciones CRUD completas pa
 - **Testing**: PyTest
 - **Framework**: Agno AI
 
-## 📁 Estructura del Proyecto
-
-```
-ai-agent/
-├── docs/                           # Documentos PDF para procesamiento
-├── docs_test/                      # PDFs para testing
-├── load_and_check.py              # Creación y validación de base vectorial
-├── read_and_update.py             # Operaciones CRUD sobre la base
-├── test_load_and_check.py         # Tests de carga y consistencia
-├── test_read_and_update.py        # Tests de operaciones CRUD
-├── Documentos.csv                 # Metadatos de documentos
-├── docs_metadata.json             # Correspondencia y orden
-└── requirements.txt               # Dependencias del proyecto
-```
-
 ## 🚀 Instalación y Configuración
 
 ### 1. Clonar el repositorio
 ```bash
 git clone <repository-url>
-cd ai-agent
+cd <folder>
 ```
 
 ### 2. Crear entorno virtual
