@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot - Qhali</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Favicon para mejor apariencia -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
+</head>
+<body>
+    <div class="chat-container">
+        <header>
+            <h1>Pregúntale a Qhali</h1>
+            <button id="new-consultation">Nueva consulta</button>
+        </header>
+        
+        <!-- Contenedor del chat con ID único para fácil referencia -->
+        <div id="chat-history" class="chat-history">
+            <!-- Los mensajes del chat serán insertados aquí por JavaScript -->
+            <div id="welcome-message" class="bot-message">
+                Hola, soy Qhali, una promotora de la salud. ¿En qué puedo ayudarte hoy?
+            </div>
+        </div>
+        
+        <!-- Formulario de mensaje -->
+        <form id="chat-form" class="chat-form" style="position: relative;">
+            <input 
+                type="text" 
+                id="user-message" 
+                placeholder="Escribe tu pregunta o presiona el micrófono" 
+                autocomplete="off" 
+                required
+            >
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/static/chat.js"></script>
+</body>
+</html>
