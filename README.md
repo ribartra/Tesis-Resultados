@@ -103,6 +103,8 @@ Tesis-Resultados/
 
 ### Resultado3-completo: Agente RAG
 - `rag_agent.py` - Agente RAG con traducción NLLB-200
+- `test_rag_agent.py` - Test de recuperación de Agente RAG
+- `test_rag_agent_results.txt` - Resultados de prueba de recuperación de Agente RAG
 
 **Características:**
 - Traducción bidireccional español-inglés con NLLB-200
