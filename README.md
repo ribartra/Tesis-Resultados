@@ -1,4 +1,4 @@
-# Qhali - Sistema de Promoción de Salud con IA
+# Sistema de Promoción de Salud con IA
 
 Repositorio de resultados experimentales de tesis sobre sistemas de chat inteligente para promoción de salud utilizando RAG (Retrieval-Augmented Generation), fine-tuning con QLoRA, y aplicaciones web interactivas.
 
