@@ -11,8 +11,8 @@ Este proyecto contiene múltiples experimentos y resultados (Resultado1-10) que 
 ```
 Tesis-Resultados/
 ├── Resultado1-completo/    # Sistema básico de vectorización de documentos
-├── Resultado2-completo/    # CRUD completo para gestión de base vectorial
-├── Resultado3-completo/    # Optimización de chunking y embeddings
+├── Resultado2-completo/    # CRUD completo para gestión de base vectorial y Optimización de chunking y embeddings
+├── Resultado3-completo/    # Agente RAG con soporte de búsqueda híbrida y avanzada y soporte a traducción bidireccional
 ├── Resultado4-completo/    # Entrenamiento QLoRA con preferencias (DPO/ORPO)
 ├── Resultado5-completo/    # Evaluación RAG con métricas y modelfiles
 ├── Resultado6-completo/    # Sistema completo de evaluación y fine-tuning
