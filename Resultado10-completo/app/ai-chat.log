@@ -1,0 +1,27 @@
+● ai-chat.service - AI Chat FastAPI Server
+     Loaded: loaded (/etc/systemd/system/ai-chat.service; enabled; vendor preset: enabled)
+     Active: active (running) since Wed 2025-03-19 16:19:05 -05; 7s ago
+   Main PID: 499560 (uvicorn)
+      Tasks: 20 (limit: 153871)
+     Memory: 230.0M
+        CPU: 1.565s
+     CGroup: /system.slice/ai-chat.service
+             ├─499560 /home/pucp-ss/Documents/Qhali/webserver_base/venv/bin/python3 /home/pucp-ss/Documents/Qhali/webserver_base/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 6
+             ├─499562 /home/pucp-ss/Documents/Qhali/webserver_base/venv/bin/python3 -c "from multiprocessing.resource_tracker import main;main(6)"
+             ├─499563 /home/pucp-ss/Documents/Qhali/webserver_base/venv/bin/python3 -c "from multiprocessing.spawn import spawn_main; spawn_main(tracker_fd=7, pipe_handle=9)" --multiprocessing-fork
+             ├─499564 /home/pucp-ss/Documents/Qhali/webserver_base/venv/bin/python3 -c "from multiprocessing.spawn import spawn_main; spawn_main(tracker_fd=7, pipe_handle=13)" --multiprocessing-fork
+             ├─499565 /home/pucp-ss/Documents/Qhali/webserver_base/venv/bin/python3 -c "from multiprocessing.spawn import spawn_main; spawn_main(tracker_fd=7, pipe_handle=17)" --multiprocessing-fork
+             ├─499566 /home/pucp-ss/Documents/Qhali/webserver_base/venv/bin/python3 -c "from multiprocessing.spawn import spawn_main; spawn_main(tracker_fd=7, pipe_handle=21)" --multiprocessing-fork
+             ├─499567 /home/pucp-ss/Documents/Qhali/webserver_base/venv/bin/python3 -c "from multiprocessing.spawn import spawn_main; spawn_main(tracker_fd=7, pipe_handle=25)" --multiprocessing-fork
+             └─499568 /home/pucp-ss/Documents/Qhali/webserver_base/venv/bin/python3 -c "from multiprocessing.spawn import spawn_main; spawn_main(tracker_fd=7, pipe_handle=29)" --multiprocessing-fork
+
+Uya 19 16:19:05 pucp-Vector uvicorn[499568]: INFO:     Application startup complete.
+Uya 19 16:19:05 pucp-Vector uvicorn[499564]: INFO:     Started server process [499564]
+Uya 19 16:19:05 pucp-Vector uvicorn[499564]: INFO:     Waiting for application startup.
+Uya 19 16:19:05 pucp-Vector uvicorn[499564]: INFO:     Application startup complete.
+Uya 19 16:19:05 pucp-Vector uvicorn[499563]: INFO:     Started server process [499563]
+Uya 19 16:19:05 pucp-Vector uvicorn[499563]: INFO:     Waiting for application startup.
+Uya 19 16:19:05 pucp-Vector uvicorn[499563]: INFO:     Application startup complete.
+Uya 19 16:19:05 pucp-Vector uvicorn[499566]: INFO:     Started server process [499566]
+Uya 19 16:19:05 pucp-Vector uvicorn[499566]: INFO:     Waiting for application startup.
+Uya 19 16:19:05 pucp-Vector uvicorn[499566]: INFO:     Application startup complete.
