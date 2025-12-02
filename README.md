@@ -87,6 +87,12 @@ Tesis-Resultados/
 - `read_and_update.py` - Interfaz CRUD interactiva
 - `test_read_and_update.py` - Suite de tests CRUD
 
+**Mejoras implementadas:**
+- Optimización de parámetros de chunking
+- Refinamiento de índices vectoriales
+- Mejora en manejo de metadatos JSON
+
+
 **Características:**
 - ✅ **CREATE**: Agregar nuevos documentos desde CSV
 - ✅ **READ**: Consultar detalles de documentos vectorizados
@@ -96,22 +102,22 @@ Tesis-Resultados/
 - Reindexación opcional tras operaciones
 - Cobertura de testing 100%
 
-### Resultado3-completo: Optimización
-**Mejoras implementadas:**
-- Optimización de parámetros de chunking
-- Refinamiento de índices vectoriales
-- Mejora en manejo de metadatos JSON
+### Resultado3-completo: Agente RAG
+- `rag_agent.py` - Agente RAG con traducción NLLB-200
+
+**Características:**
+- Traducción bidireccional español-inglés con NLLB-200
+- Soporte de RAG hybrid y advanced
+- Recuperación competente > 80% del sobre documentos golden en Hit@10
 
 ### Resultado4-completo: Fine-tuning con QLoRA
 **Scripts principales:**
 - `qlora_pref_train.py` - Entrenamiento QLoRA con DPO/ORPO
-- `rag_agent.py` - Agente RAG con traducción NLLB-200
 
 **Características:**
 - Entrenamiento con preferencias (prompt, chosen, rejected)
 - Algoritmos DPO (Direct Preference Optimization) y ORPO
 - Split determinista train/val/test por hash
-- Traducción bidireccional español-inglés con NLLB-200
 - Presets de hiperparámetros optimizados
 - Dataset de interacciones reales en `datasets/`
 
@@ -334,7 +340,7 @@ Los resultados se guardan en:
 ## 🗂️ Datasets
 
 ### Documentos PDF
-Colección de 13 artículos científicos en `docs/`:
+Colección de 72 artículos científicos en `docs/`:
 - Promoción de salud
 - Salud comunitaria
 - Intervenciones en salud pública
@@ -492,8 +498,8 @@ Este proyecto está bajo la Licencia Apache 2.0 - ver archivo [LICENSE](LICENSE)
 ---
 
 **Proyecto de Tesis** - Sistema de Promoción de Salud con IA  
-**Universidad**: [Nombre de Universidad]  
-**Autor**: [Nombre del Autor]  
+**Universidad**: Pontificia Universidad Católica del Perú  
+**Autor**: Ricardo Alexander Bartra Quispe
 **Año**: 2025
 
 Para más información, consulta la documentación individual en cada carpeta de resultado.
