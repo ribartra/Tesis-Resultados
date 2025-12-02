@@ -51,7 +51,6 @@ Tesis-Resultados/
 ### Frontend
 - **HTML5/CSS3/JavaScript** - Interfaz web moderna
 - **FontAwesome** - Iconografía
-- **WebSockets** - Comunicación en tiempo real
 
 ### Embeddings y Vectorización
 - **Nomic Embeddings** (nomic-embed-text-v2, 768 dimensiones)
@@ -122,7 +121,6 @@ Tesis-Resultados/
 - Dataset de interacciones reales en `datasets/`
 
 **Datasets:**
-- `Interaccion-Qhali-care-25-01.csv` - Interacciones reales del sistema
 - `augmented_pairs.csv` - Pares aumentados de entrenamiento
 - `preferences.csv` - Dataset de preferencias
 
@@ -166,7 +164,6 @@ Resultado10-completo/
 │   ├── main.py                  # FastAPI application
 │   ├── database.py              # PostgreSQL connection
 │   ├── rag_agent.py             # RAG agent con NLLB-200
-│   ├── wsmanager.py             # WebSocket manager
 │   ├── api/
 │   │   ├── chat.py              # Router de chat con streaming
 │   │   └── chat_backup.py       # Backup del router
@@ -179,8 +176,6 @@ Resultado10-completo/
 │   │   └── chat_service.py      # Lógica de negocio
 │   ├── static/
 │   │   ├── styles.css           # Estilos modernos
-│   │   ├── audio-service.js     # Servicio de audio
-│   │   ├── qr-qhali.svg         # QR code
 │   │   └── fontawesome/         # 2000+ iconos
 │   └── templates/
 │       ├── chat.html            # Interfaz de chat
